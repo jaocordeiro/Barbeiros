@@ -1,11 +1,91 @@
-import React from 'react';
-import {Container} from './SingUp.Styled';
-import {Text} from 'react-native';
+import React, {useState, useContext} from 'react';
+import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-community/async-storage';
+import {UserContext} from '../../contexts/UserContext';
+import {
+  Container,
+  InputArea,
+  CustomButton,
+  CustomButtonText,
+  SignMessageButton,
+  SignMessageButtonText,
+  SignMessageButtonTextBold,
+} from './SingUp.Styled';
+import Api from '../../Api';
+import SignInput from '../../components/SignInput';
+import BarberLogo from '../../assets/barber.svg';
+import PersonIcon from '../../assets/person.svg';
+import EmailIcon from '../../assets/email.svg';
+import LockIcon from '../../assets/lock.svg';
 
 export default () => {
+  const {dispatch: userDispatch} = useContext(UserContext);
+  const navigation = useNavigation();
+
+  const [nameField, setNameField] = useState('');
+  const [emailField, setEmailField] = useState('');
+  const [passwordField, setPasswordField] = useState('');
+
+  const handleSignClick = async () => {
+    if (nameField !== '' && emailField !== '' && passwordField !== '') {
+      let res = await Api.singUp(nameField, emailField, passwordField);
+      if (res.token) {
+        await AsyncStorage.setItem('token', res.token);
+        userDispatch({
+          type: 'setAvatar',
+          payload: {
+            avatar: res.data.avatar,
+          },
+        });
+        navigation.reset({
+          routes: [{name: 'MainTab'}],
+        });
+      } else {
+        alert('Error: ' + res.error);
+      }
+    } else {
+      alert('Preencha todos os campos');
+    }
+  };
+
+  const handleMessageButtonClick = () => {
+    navigation.reset({
+      routes: [{name: 'SingIn'}],
+    });
+  };
+
   return (
     <Container>
-      <Text>SingUp</Text>
+      <BarberLogo width="100%" height="160" />
+
+      <InputArea>
+        <SignInput
+          IconSvg={PersonIcon}
+          placeholder="Digite seu nome"
+          value={nameField}
+          onChangeText={e => setNameField(e)}
+        />
+        <SignInput
+          IconSvg={EmailIcon}
+          placeholder="Digite seu e-mail"
+          value={emailField}
+          onChangeText={e => setEmailField(e)}
+        />
+        <SignInput
+          IconSvg={LockIcon}
+          placeholder="Digite sua senha"
+          value={passwordField}
+          onChangeText={e => setPasswordField(e)}
+          password={true}
+        />
+        <CustomButton onPress={handleSignClick}>
+          <CustomButtonText>CADASTRAR</CustomButtonText>
+        </CustomButton>
+      </InputArea>
+      <SignMessageButton onPress={handleMessageButtonClick}>
+        <SignMessageButtonText>Ja possui uma conta?</SignMessageButtonText>
+        <SignMessageButtonTextBold>Faça o login</SignMessageButtonTextBold>
+      </SignMessageButton>
     </Container>
   );
 };
