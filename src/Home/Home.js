@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {Platform} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {request, PERMISSIONS} from '@react-native-community/geolocation';
+import {request, PERMISSIONS} from 'react-native-permissions';
 import Geolocation from '@react-native-community/geolocation';
 import {
   Container,
@@ -24,23 +24,30 @@ export default () => {
   const [loading, setLoading] = useState(false);
   const [list, setList] = useState([]);
 
-  const handleLocationFinder = async () => {
+  const getGeoLocaation = () => {
     setCoords(null);
-    let result = await request(
+    let result = request(
       Platform.OS === 'ios'
         ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE
-        : PERMISSIONS.ACCESS_FINE_LOCATION,
+        : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
     );
     if (result === 'granted') {
       setLoading(true);
       setLocationText('');
       setList([]);
-
-      Geolocation.getCurrentPosition(info => {
-        setCoords(info.coords);
-        getBarbers();
-      });
     }
+    const config = {
+      enableHighAccuracy: true,
+      timeout: 2000,
+      maximumAge: 3600000,
+    };
+
+    Geolocation.getCurrentPosition(info => {
+      setCoords(info.coords);
+      getBarbers();
+      console.log(info);
+      config;
+    });
   };
 
   const getBarbers = () => {};
@@ -64,7 +71,7 @@ export default () => {
             value={locationText}
             onChangeText={e => setLocationText(e)}
           />
-          <LocationFinder onPress={handleLocationFinder}>
+          <LocationFinder onPress={getGeoLocaation}>
             <MyLocationIcon width="26" height="26" fill="#fff" />
           </LocationFinder>
         </LocationArea>
