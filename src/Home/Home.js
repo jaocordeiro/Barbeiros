@@ -1,8 +1,9 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {Platform} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {request, PERMISSIONS} from 'react-native-permissions';
 import Geolocation from '@react-native-community/geolocation';
+import Api from '../Api';
 import {
   Container,
   Scroller,
@@ -13,9 +14,11 @@ import {
   LocationInput,
   LocationFinder,
   LoadingIcon,
+  ListArea,
 } from './Home.Styled';
 import SearchIcon from '../assets/search.svg';
 import MyLocationIcon from '../assets/my_location.svg';
+import BarberItem from '../components/BarberItem';
 
 export default () => {
   const navigation = useNavigation();
@@ -39,18 +42,37 @@ export default () => {
     const config = {
       enableHighAccuracy: true,
       timeout: 2000,
-      maximumAge: 3600000,
+      maximumAge: 20000,
     };
 
     Geolocation.getCurrentPosition(info => {
       setCoords(info.coords);
-      getBarbers();
       console.log(info);
       config;
+      getBarbers();
     });
   };
 
-  const getBarbers = () => {};
+  const getBarbers = async () => {
+    setLoading(true);
+    setList([]);
+
+    let res = await Api.getBarbers();
+    //console.log(res);
+    if (res.error === '') {
+      if (res.loc) {
+        setLocationText(res.loc);
+      }
+      setList(res.data);
+    } else {
+      alert('Error: ' + res.error);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    getBarbers();
+  }, []);
 
   return (
     <Container>
@@ -76,6 +98,12 @@ export default () => {
           </LocationFinder>
         </LocationArea>
         {loading && <LoadingIcon width="26" height="26" fill="#fff" />}
+
+        <ListArea>
+          {list.map((item, k) => (
+            <BarberItem key={k} data={item} />
+          ))}
+        </ListArea>
       </Scroller>
     </Container>
   );
