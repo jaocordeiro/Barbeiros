@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Platform} from 'react-native';
+import {Platform, RefreshControl} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {request, PERMISSIONS} from 'react-native-permissions';
 import Geolocation from '@react-native-community/geolocation';
@@ -26,6 +26,7 @@ export default () => {
   const [coords, setCoords] = useState(null);
   const [loading, setLoading] = useState(false);
   const [list, setList] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const getGeoLocaation = () => {
     setCoords(null);
@@ -57,7 +58,14 @@ export default () => {
     setLoading(true);
     setList([]);
 
-    let res = await Api.getBarbers();
+    let lat = null;
+    let lng = null;
+    if (coords) {
+      lat = coords.latitude;
+      lng = coords.longitude;
+    }
+
+    let res = await Api.getBarbers(lat, lng, locationText);
     //console.log(res);
     if (res.error === '') {
       if (res.loc) {
@@ -74,9 +82,22 @@ export default () => {
     getBarbers();
   }, []);
 
+  const onRefresh = () => {
+    setRefreshing(false);
+    getBarbers();
+  };
+
+  const handleLocationSearch = () => {
+    setCoords({});
+    getBarbers();
+  };
+
   return (
     <Container>
-      <Scroller>
+      <Scroller
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
         <HeaderArea>
           <HeaderTitle numberOfLines={2}>
             Encontre seu barbeiro favorito
@@ -92,6 +113,7 @@ export default () => {
             placeholderTextColor="#fff"
             value={locationText}
             onChangeText={e => setLocationText(e)}
+            onEndEditing={handleLocationSearch}
           />
           <LocationFinder onPress={getGeoLocaation}>
             <MyLocationIcon width="26" height="26" fill="#fff" />
