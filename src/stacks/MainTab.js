@@ -1,11 +1,11 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import CustomTabBar from '../components/CustomTabBar';
-import Home from '../Home/Home';
+import Home from '../screens/Home/Home';
 import Search from '../Search/Search';
-import Appointments from '../Appointments/Appointments';
-import Favorites from '../Favorites/Favorites';
-import Profile from '../Profile/Profile';
+import Appointments from '../screens/Appointments/Appointments';
+import Favorites from '../screens/Favorites/Favorites';
+import Profile from '../screens/Profile/Profile';
 
 const Tab = createBottomTabNavigator();
 

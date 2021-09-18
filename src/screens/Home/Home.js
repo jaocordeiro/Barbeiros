@@ -3,7 +3,7 @@ import {Platform, RefreshControl} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {request, PERMISSIONS} from 'react-native-permissions';
 import Geolocation from '@react-native-community/geolocation';
-import Api from '../Api';
+import Api from '../../Api';
 import {
   Container,
   Scroller,
@@ -16,9 +16,9 @@ import {
   LoadingIcon,
   ListArea,
 } from './Home.Styled';
-import SearchIcon from '../assets/search.svg';
-import MyLocationIcon from '../assets/my_location.svg';
-import BarberItem from '../components/BarberItem';
+import SearchIcon from '../../assets/search.svg';
+import MyLocationIcon from '../../assets/my_location.svg';
+import BarberItem from '../../components/BarberItem';
 
 export default () => {
   const navigation = useNavigation();
