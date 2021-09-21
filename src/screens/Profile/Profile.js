@@ -13,6 +13,7 @@ export default () => {
       routes: [{name: 'SingIn'}],
     });
   };
+
   return (
     <Container>
       <Text>Profile</Text>
