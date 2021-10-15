@@ -107,6 +107,30 @@ const DateNextArea = styled.TouchableOpacity`
   align-items: flex-start;
 `;
 
+const DateList = styled.ScrollView``;
+
+const DateItem = styled.TouchableOpacity`
+  width: 45px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  color: #000000;
+`;
+
+const DateItemWeekDay = styled.Text`
+  font-size: 16px;
+  font-weight: bold;
+  color: #000000;
+`;
+
+const DateItemNumber = styled.Text`
+  font-size: 16px;
+  font-weight: bold;
+  color: #000000;
+`;
+
 const month = [
   'Janeiro',
   'Fevereiro',
@@ -133,6 +157,34 @@ export default ({show, setShow, user, service}) => {
   const [selectedHour, setSelectedHour] = useState(null);
   const [listDays, setListDays] = useState([]);
   const [listHours, setListHours] = useState([]);
+
+  useEffect(() => {
+    if (user.available) {
+      let daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+      let newListDays = [];
+
+      for (let i = 1; i <= daysInMonth; i++) {
+        let d = new Date(selectedYear, selectedMonth, i);
+        let year = d.getFullYear();
+        let month = d.getMonth() + 1;
+        let day = d.getDate();
+        month = month < 10 ? '0' + month : month;
+        day = day < 10 ? '0' + day : day;
+        let selDate = `${year}-${month}-${day}`;
+        let availability = user.available.filter(e => e.date === selDate);
+        newListDays.push({
+          status: false,
+          weekday: '',
+          numberDay: i,
+        });
+      }
+
+      setListDays(newListDays);
+      setSelectedDay(1);
+      setListHours([]);
+      setSelectedHour(0);
+    }
+  }, [user, selectedMonth, selectedYear]);
 
   useEffect(() => {
     let today = new Date();
@@ -200,6 +252,14 @@ export default ({show, setShow, user, service}) => {
                 <NavNextIcon width="35" height="35" fill="#000000" />
               </DateNextArea>
             </DateInfo>
+            <DateList horizontal={true} showsHorizontalScrollIndicator={false}>
+              {listDays.map((item, key) => (
+                <DateItem key={key} onPress={() => {}}>
+                  <DateItemWeekDay>{item.weekday}</DateItemWeekDay>
+                  <DateItemNumber>{item.number}</DateItemNumber>
+                </DateItem>
+              ))}
+            </DateList>
           </ModalItem>
           <FinishButton onPress={handleFinishClick}>
             <FinishButtonText>Finalizar Agendamento</FinishButtonText>
