@@ -180,7 +180,7 @@ export default ({show, setShow, user, service}) => {
       }
 
       setListDays(newListDays);
-      setSelectedDay(1);
+      setSelectedDay(0);
       setListHours([]);
       setSelectedHour(0);
     }
@@ -206,7 +206,7 @@ export default ({show, setShow, user, service}) => {
     mountDate.setMonth(mountDate.getMonth() + 1);
     setSelectedYear(mountDate.getFullYear());
     setSelectedMonth(mountDate.getMonth());
-    setSelectedDay(1);
+    setSelectedDay(0);
   };
 
   const handleCloseButton = () => {
@@ -254,13 +254,47 @@ export default ({show, setShow, user, service}) => {
             </DateInfo>
             <DateList horizontal={true} showsHorizontalScrollIndicator={false}>
               {listDays.map((item, key) => (
-                <DateItem key={key} onPress={() => {}}>
-                  <DateItemWeekDay>{item.weekday}</DateItemWeekDay>
-                  <DateItemNumber>{item.number}</DateItemNumber>
+                <DateItem
+                  key={key}
+                  onPress={() =>
+                    item.status ? setSelectedDay(item.number) : null
+                  }
+                  style={{
+                    opacity: item.status ? 1 : 0.5,
+                    backgroundColor:
+                      item.number === selectedDay ? '#4eadbe' : '#ffffff',
+                  }}>
+                  <DateItemWeekDay
+                    style={{
+                      color:
+                        item.number === selectedDay ? '#ffffff' : '#000000',
+                    }}>
+                    {item.weekday}
+                  </DateItemWeekDay>
+                  <DateItemNumber
+                    style={{
+                      color:
+                        item.number === selectedDay ? '#ffffff' : '#000000',
+                    }}>
+                    {item.number}
+                  </DateItemNumber>
                 </DateItem>
               ))}
             </DateList>
           </ModalItem>
+          {listHours.length > 0 && (
+            <ModalItem>
+              <TimeList 
+                horizontal={true} 
+                showsHorizontalScrollIndicator={false}>
+                {listHours.map((item, key) => (
+                  <TimeItem key={key} onPress={() => {}}>
+                    <TimeItemText>{item}</TimeItemText>
+                  </TimeItem>
+                ))}
+              </TimeList>
+            </ModalItem>
+          )}
           <FinishButton onPress={handleFinishClick}>
             <FinishButtonText>Finalizar Agendamento</FinishButtonText>
           </FinishButton>
