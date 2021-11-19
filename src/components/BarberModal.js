@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import styled from 'styled-components/native';
 import ExpandIcon from '../assets/expand.svg';
+import Api from '../Api';
 import {useNavigation} from '@react-navigation/native';
 import NavPrevIcon from '../assets/nav_prev.svg';
 import NavNextIcon from '../assets/nav_next.svg';
@@ -131,6 +132,20 @@ const DateItemNumber = styled.Text`
   color: #000000;
 `;
 
+const TimeList = styled.ScrollView``;
+
+const TimeItem = styled.TouchableOpacity`
+  width: 75px;
+  height: 40px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+`;
+
+const TimeItemText = styled.Text`
+  font-size: 16px;
+`;
+
 const month = [
   'Janeiro',
   'Fevereiro',
@@ -173,8 +188,8 @@ export default ({show, setShow, user, service}) => {
         let selDate = `${year}-${month}-${day}`;
         let availability = user.available.filter(e => e.date === selDate);
         newListDays.push({
-          status: false,
-          weekday: '',
+          status: availability.length > 0 ? true : false,
+          weekday: days[d.getDay()],
           numberDay: i,
         });
       }
@@ -185,6 +200,24 @@ export default ({show, setShow, user, service}) => {
       setSelectedHour(0);
     }
   }, [user, selectedMonth, selectedYear]);
+
+  useEffect(() => {
+    if (user.available && selectedDay > 0) {
+      let d = new Date(selectedYear, selectedMonth, selectedDay);
+      let year = d.getFullYear();
+      let month = d.getMonth() + 1;
+      let day = d.getDate();
+      month = month < 10 ? '0' + month : month;
+      day = day < 10 ? '0' + day : day;
+      let selDate = `${year}-${month}-${day}`;
+
+      let availability = user.available.filter(e => e.date === selDate);
+      if (availability.length > 0) {
+        setListHours(availability[0].hours);
+      }
+    }
+    setSelectedHour(null);
+  }, [user, selectedYear, selectedMonth, selectedDay]);
 
   useEffect(() => {
     let today = new Date();
@@ -213,7 +246,33 @@ export default ({show, setShow, user, service}) => {
     setShow(false);
   };
 
-  const handleFinishClick = () => {};
+  const handleFinishClick = async () => {
+    if (
+      user.id &&
+      service != null &&
+      selectedYear > 0 &&
+      selectedMonth > 0 &&
+      selectedDay > 0 &&
+      selectedHour != null
+    ) {
+      let res = await Api.setAppointment(
+        user.id,
+        service,
+        selectedYear,
+        selectedMonth,
+        selectedDay,
+        selectedHour,
+      );
+      if (res.error === '') {
+        setShow(false);
+        navigation.navigate('appointments');
+      } else {
+        alert(res.error);
+      }
+    } else {
+      alert('Preencha todos os dados');
+    }
+  };
 
   return (
     <Modal transparent={true} visible={show} animationType="slide">
@@ -282,14 +341,26 @@ export default ({show, setShow, user, service}) => {
               ))}
             </DateList>
           </ModalItem>
-          {listHours.length > 0 && (
+          {selectedDay > 0 && listHours.length > 0 && (
             <ModalItem>
-              <TimeList 
-                horizontal={true} 
+              <TimeList
+                horizontal={true}
                 showsHorizontalScrollIndicator={false}>
                 {listHours.map((item, key) => (
-                  <TimeItem key={key} onPress={() => {}}>
-                    <TimeItemText>{item}</TimeItemText>
+                  <TimeItem
+                    key={key}
+                    onPress={() => setSelectedHour(item)}
+                    style={{
+                      backgroundColor:
+                        item === selectedHour ? '#4eadbe' : '#fffff',
+                    }}>
+                    <TimeItemText
+                      style={{
+                        color: item === selectedHour ? '#ffffff' : '#000000',
+                        fontWeight: item === selectedHour ? 'bold' : 'normal',
+                      }}>
+                      {item}
+                    </TimeItemText>
                   </TimeItem>
                 ))}
               </TimeList>
